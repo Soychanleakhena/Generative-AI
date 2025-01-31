@@ -134,25 +134,19 @@ export const updateQuiz = async (req: Request, res: Response) => {
     res.end();
   }
 };
-
 export const deleteQuiz = async (req: Request, res: Response) => {
-  const generateQuiz = AppDataSource.getRepository(Quiz);
-  try {
-    const deleteQuiz = await generateQuiz.findOneBy({ id: req.params?.id });
+  const quizRepo = AppDataSource.getRepository(Quiz);
+  const { id } = req.params;
 
-    if (!deleteQuiz) {
-      return res.status(404).json({ message: "quiz not fund" });
-    }
-    await generateQuiz.remove(deleteQuiz);
-    res.status(200).json({
-      message: "delete quiz success",
-      deleteQuiz,
-    });
+  try {
+      const deletequiz = await quizRepo.findOne({ where: { id } });
+      if (!deletequiz) {
+          return res.status(404).json({ error: "quiz not found" });
+      }
+
+      await quizRepo.remove(deletequiz);
+      return res.status(200).json({ message: "quiz deleted successfully" });
   } catch (error) {
-    console.error(error);
-    res.write(
-      `data: ${JSON.stringify({ error: "Internal server error" })}\n\n`
-    );
-    res.end();
+      return res.status(500).json({ error: "Error deleting quiz" });
   }
-};
+};  
